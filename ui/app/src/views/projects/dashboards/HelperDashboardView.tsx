@@ -24,6 +24,7 @@ import { useVariableList } from '../../../model/variable-client';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
 import { useProject } from '../../../model/project-client';
+import { useConfigContext } from '../../../context/Config';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
@@ -40,6 +41,7 @@ export interface GenericDashboardViewProps {
 export function HelperDashboardView(props: GenericDashboardViewProps) {
   const { dashboardResource, onSave, onDiscard, isReadonly, isEditing, isCreating } = props;
 
+  const { config } = useConfigContext();
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
   useEffect(() => {
     // warm up the caching of the datasources
@@ -89,7 +91,11 @@ export function HelperDashboardView(props: GenericDashboardViewProps) {
         >
           <ValidationProvider>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
+              <UsageMetricsProvider
+                project={project.metadata.name}
+                dashboard={dashboardResource.metadata.name}
+                send_usage_metrics={config.frontend.send_usage_metrics}
+              >
                 <ViewDashboard
                   dashboardResource={dashboardResource}
                   datasourceApi={datasourceApi}

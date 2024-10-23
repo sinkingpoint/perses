@@ -22,6 +22,7 @@ interface UsageMetrics {
   startRenderTime: number;
   renderDurationMs: number;
   renderErrorCount: number;
+  send_usage_metrics: boolean;
   pendingQueries: Map<string, QueryState>;
 }
 
@@ -29,6 +30,7 @@ interface UsageMetricsProps {
   project: string;
   dashboard: string;
   children: ReactNode;
+  send_usage_metrics?: boolean;
 }
 
 interface UseUsageMetricsResults {
@@ -73,6 +75,10 @@ export const useUsageMetrics = (): UseUsageMetricsResults => {
 };
 
 const submitMetrics = async (stats: UsageMetrics) => {
+  if (!stats.send_usage_metrics) {
+    return;
+  }
+
   await fetch('/api/v1/view', {
     method: 'POST',
     headers: {
@@ -87,10 +93,11 @@ const submitMetrics = async (stats: UsageMetrics) => {
   });
 };
 
-export const UsageMetricsProvider = ({ project, dashboard, children }: UsageMetricsProps) => {
+export const UsageMetricsProvider = ({ project, dashboard, children, send_usage_metrics }: UsageMetricsProps) => {
   const ctx = {
     project: project,
     dashboard: dashboard,
+    send_usage_metrics: send_usage_metrics ?? false,
     renderErrorCount: 0,
     startRenderTime: Date.now(),
     renderDurationMs: 0,
